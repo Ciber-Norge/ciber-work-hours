@@ -15,6 +15,7 @@ var paths = {
 };
 
 var moduleName = 'ciber-work-hours';
+var fileName = moduleName + '.js';
 
 var plumberConf = {};
 
@@ -48,13 +49,14 @@ gulp.task('rulesets', ['clean-dist'], function () {
 gulp.task('rulesets-insert', ['rulesets'], function () {
     return gulp.src('./index.js')
         .pipe(plugins.fileInsert({'/* insert: rulesets */': './dist/rulesets.js'}))
+        .pipe(plugins.rename(fileName))
         .pipe(gulp.dest('./dist/'));
 });
 
 gulp.task('browserify', ['rulesets-insert', 'clean-rulesets'], function () {
-  return gulp.src('./dist/index.js')
+  return gulp.src('./dist/' + fileName)
     .pipe(through.obj(function (file, enc, next) {
-        browserify(file.path, {expose: moduleName, bundleExternal : false})
+        browserify(file.path, {expose: moduleName})
             .bundle(function (err, res) {
                 file.contents = res;
                 next(null, file);

@@ -62,7 +62,9 @@ module.exports = function (ruleset) {
     if (typeof ruleset === 'string') {
         if (isEmpty(premadeRulesets)) {
             /* dev: rulesets are not injected */
-            ruleset = require('js-yaml').load(require('fs').readFileSync('./rules/' + ruleset + '.yaml'));
+            ruleset = require('js' + '-yaml').load(
+                require('f' + 's').readFileSync('./rules/' + ruleset + '.yaml')
+            );
         } else {
             ruleset = premadeRulesets[ruleset];
         }

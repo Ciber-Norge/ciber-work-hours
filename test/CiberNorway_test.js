@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('should');
-var workHours = require('../');
+var workHours = require('../')('no');
 
 describe('Ciber Norway', function () {
     it('Christmas is a day off', function () {

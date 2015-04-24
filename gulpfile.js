@@ -4,8 +4,9 @@ var gulp    = require('gulp');
 var del     = require('del');
 var browserify = require('browserify');
 var transform = require('vinyl-transform');
-var uglify = require('gulp-uglify');
 var plugins = require('gulp-load-plugins')();
+var path = require('path');
+var through = require('through2');
 
 var paths = {
   lint: ['./gulpfile.js', './lib/**/*.js'],
@@ -27,19 +28,38 @@ gulp.task('clean-dist', function () {
     return del(['dist/']);
 });
 
-gulp.task('browserify', ['clean-dist'], function () {
-  // transform regular node stream to gulp (buffered vinyl) stream
+gulp.task('clean-rulesets', ['rulesets-insert'], function () {
+    return del(['dist/rulesets.js']);
+});
 
-  var browserified = transform(function(filename) {
-    var b = browserify();
-    b.require(filename, {expose: moduleName});
-    return b.bundle();
-  });
+gulp.task('rulesets', ['clean-dist'], function () {
+    return gulp.src('./rules/*.yaml')
+        .pipe(plugins.foreach(function (stream, file) {
+            var key = path.basename(file.path, '.yaml');
 
-  return gulp.src('./index.js')
-    .pipe(browserified)
-        // Add transformation tasks to the pipeline here.
-    .pipe(uglify())
+            return stream
+                .pipe(plugins.yaml())
+                .pipe(plugins.insert.wrap('"' + key + '":', ','));
+        }))
+        .pipe(plugins.concat('rulesets.js'))
+        .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('rulesets-insert', ['rulesets'], function () {
+    return gulp.src('./index.js')
+        .pipe(plugins.fileInsert({'/* insert: rulesets */': './dist/rulesets.js'}))
+        .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('browserify', ['rulesets-insert', 'clean-rulesets'], function () {
+  return gulp.src('./dist/index.js')
+    .pipe(through.obj(function (file, enc, next) {
+        browserify(file.path, {expose: moduleName, bundleExternal : false})
+            .bundle(function (err, res) {
+                file.contents = res;
+                next(null, file);
+            });
+    }))
     .pipe(gulp.dest('./dist/'));
 });
 
@@ -50,13 +70,13 @@ gulp.task('lint', function () {
 });
 
 gulp.task('unitTest', function () {
-  gulp.src(paths.tests, {cwd: __dirname})
+  return gulp.src(paths.tests, {cwd: __dirname})
     .pipe(plugins.plumber(plumberConf))
     .pipe(plugins.mocha());
 });
 
 gulp.task('watch', ['test'], function () {
-  gulp.watch(paths.watch, ['test']);
+  gulp.watch(paths.watch, ['yaml', 'test']);
 });
 
 gulp.task('test', ['lint', 'unitTest']);

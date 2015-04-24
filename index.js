@@ -1,8 +1,22 @@
 'use strict';
 
+function isEmpty(obj) {
+    if (obj == null) return true;
+    if (obj.length > 0)    return false;
+    if (obj.length === 0)  return true;
+
+    for (var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) return false;
+    }
+
+    return true;
+}
+
 function find(array, condition) {
-    for (var i = 0; i < array.length; i++) {
-        if (condition(array[i])) return array[i];
+    if (array && array.length) {
+        for (var i = 0; i < array.length; i++) {
+            if (condition(array[i])) return array[i];
+        }
     }
 
     return null;
@@ -40,66 +54,80 @@ function addDays(date, numDays) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + numDays)
 }
 
-/**
- * Calculates work hours of a given day
- * Hard-coded for Ciber Norge AS
- */
-function workHoursInDay(date) {
-    var easter = easterForYear(date.getFullYear()); // Gives the easter sunday
+var premadeRulesets = {
+    /* insert: rulesets */
+};
 
-    function isRuleApplicable(rule) {
-        if (rule.date !== undefined && rule.month !== undefined) {
-            if (rule.year !== undefined) {
-                return sameDay(new Date(rule.year, rule.month, rule.date), date);
-            }
-            return sameDay(new Date(date.getFullYear(), rule.month, rule.date), date);
-        }
-        if (rule.day !== undefined) return rule.day === date.getDay();
-        if (rule.reference !== undefined) {
-            if (rule.reference === 'EASTER') {
-                return sameDay(addDays(easter, rule.offset || 0), date);
-            }
+module.exports = function (ruleset) {
+    if (typeof ruleset === 'string') {
+        if (isEmpty(premadeRulesets)) {
+            /* dev: rulesets are not injected */
+            ruleset = require('js-yaml').load(require('fs').readFileSync('./rules/' + ruleset + '.yaml'));
+        } else {
+            ruleset = premadeRulesets[ruleset];
         }
     }
+    // Assume well-formatted ruleset
 
-    var ruleset = require('./rules/CiberNorway');
+    /**
+     * Calculates work hours of a given day
+     * Hard-coded for Ciber Norge AS
+     */
+    function workHoursInDay(date) {
+        var easter = easterForYear(date.getFullYear()); // Gives the easter sunday
 
-    var dayOff = find(ruleset.daysOff, isRuleApplicable);
+        function isRuleApplicable(rule) {
+            if (rule.date !== undefined && rule.month !== undefined) {
+                if (rule.year !== undefined) {
+                    return sameDay(new Date(rule.year, rule.month, rule.date), date);
+                }
+                return sameDay(new Date(date.getFullYear(), rule.month, rule.date), date);
+            }
+            if (rule.day !== undefined) return rule.day === date.getDay();
+            if (rule.reference !== undefined) {
+                if (rule.reference === 'EASTER') {
+                    return sameDay(addDays(easter, rule.offset || 0), date);
+                }
+            }
+        }
 
-    if (dayOff) {
-        return 0;
+        var dayOff = find(ruleset.daysOff, isRuleApplicable);
+
+        if (dayOff) {
+            return 0;
+        }
+
+        var halfDay = find(ruleset.halfDays, isRuleApplicable);
+
+        if (halfDay) {
+            return halfDay.hours;
+        }
+
+        return ruleset.regularHours;
     }
 
-    var halfDay = find(ruleset.halfDays, isRuleApplicable);
+    /**
+     * Calculates working hours in the month of a given JavaScript Date.
+     * @param date
+     * @returns Number of working hours in the month
+     */
+    function workHoursInMonth(date) {
+        var current = new Date(date.getFullYear(), date.getMonth(), 1),
+            last = new Date(date.getFullYear(), date.getMonth() + 1, 1),
+            sum = 0;
 
-    if (halfDay) {
-        return halfDay.hours;
+        while (!sameDay(current, last)) {
+            sum += workHoursInDay(current);
+
+            current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1);
+        }
+
+        return sum;
     }
 
-    return ruleset.regularHours;
-}
-
-/**
- * Calculates working hours in the month of a given JavaScript Date.
- * @param date
- * @returns Number of working hours in the month
- */
-function workHoursInMonth(date) {
-    var current = new Date(date.getFullYear(), date.getMonth(), 1),
-        last = new Date(date.getFullYear(), date.getMonth() + 1, 1),
-        sum = 0;
-
-    while (!sameDay(current, last)) {
-        sum += workHoursInDay(current);
-
-        current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1);
-    }
-
-    return sum;
-}
-
-module.exports = {
-    calculate: workHoursInDay,
-    inMonth: workHoursInMonth,
-    getDefaultWorkDay: function () { return fullDayHours; }
+    return {
+        calculate: workHoursInDay,
+        inMonth: workHoursInMonth,
+        ruleset: ruleset
+    };
 };

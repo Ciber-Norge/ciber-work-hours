@@ -40,36 +40,43 @@ function addDays(date, numDays) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + numDays)
 }
 
-var fullDayHours = 7.5;
-
 /**
  * Calculates work hours of a given day
  * Hard-coded for Ciber Norge AS
  */
 function workHoursInDay(date) {
     var easter = easterForYear(date.getFullYear()); // Gives the easter sunday
-    var ruleset = require('./rules/CiberNorway')(easter, {addDays: addDays, sameDay: sameDay});
 
-    var dayOff = find(ruleset.daysOff, function (dayOff) {
-        if (dayOff.year !== undefined && dayOff.month !== undefined && dayOff.date !== undefined) return sameDay(new Date(dayOff.year, dayOff.month, dayOff.date), date);
-        if (dayOff.month !== undefined && dayOff.date !== undefined) return sameDay(new Date(date.getFullYear(), dayOff.month, dayOff.date), date);
-        if (dayOff.day !== undefined) return dayOff.day === date.getDay();
-        if (dayOff.callback !== undefined) return dayOff.callback(date);
-    });
+    function isRuleApplicable(rule) {
+        if (rule.date !== undefined && rule.month !== undefined) {
+            if (rule.year !== undefined) {
+                return sameDay(new Date(rule.year, rule.month, rule.date), date);
+            }
+            return sameDay(new Date(date.getFullYear(), rule.month, rule.date), date);
+        }
+        if (rule.day !== undefined) return rule.day === date.getDay();
+        if (rule.reference !== undefined) {
+            if (rule.reference === 'EASTER') {
+                return sameDay(addDays(easter, rule.offset || 0), date);
+            }
+        }
+    }
 
-    var halfDay = find(ruleset.halfDays, function (halfDay) {
-        if (halfDay.callback !== undefined) return halfDay.callback(date);
-    });
+    var ruleset = require('./rules/CiberNorway');
+
+    var dayOff = find(ruleset.daysOff, isRuleApplicable);
 
     if (dayOff) {
         return 0;
     }
 
+    var halfDay = find(ruleset.halfDays, isRuleApplicable);
+
     if (halfDay) {
         return halfDay.hours;
     }
 
-    return fullDayHours;
+    return ruleset.regularHours;
 }
 
 /**

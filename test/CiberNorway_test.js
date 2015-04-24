@@ -42,13 +42,13 @@ describe('Ciber Norway', function () {
     });
 
     it('The week of November 4th through 10th 2019 is a 5-day working week with a weekend', function () {
-        workHours.calculate(new Date(2019, 10, 4)).should.equal(7.5);
-        workHours.calculate(new Date(2019, 10, 5)).should.equal(7.5);
-        workHours.calculate(new Date(2019, 10, 6)).should.equal(7.5);
-        workHours.calculate(new Date(2019, 10, 7)).should.equal(7.5);
-        workHours.calculate(new Date(2019, 10, 8)).should.equal(7.5);
-        workHours.calculate(new Date(2019, 10, 9)).should.equal(0);
-        workHours.calculate(new Date(2019, 10, 10)).should.equal(0);
+        workHours.calculate(new Date(2019, 10, 4)).should.equal(7.5, 'Monday');
+        workHours.calculate(new Date(2019, 10, 5)).should.equal(7.5, 'Tuesday');
+        workHours.calculate(new Date(2019, 10, 6)).should.equal(7.5, 'Wednesday');
+        workHours.calculate(new Date(2019, 10, 7)).should.equal(7.5, 'Thursday');
+        workHours.calculate(new Date(2019, 10, 8)).should.equal(7.5, 'Friday');
+        workHours.calculate(new Date(2019, 10, 9)).should.equal(0, 'Saturday');
+        workHours.calculate(new Date(2019, 10, 10)).should.equal(0, 'Sunday');
     });
 
     it('Should detect palm sundays as days off', function () {
@@ -75,38 +75,54 @@ describe('Ciber Norway', function () {
         workHours.calculate(new Date(2016, 2, 23)).should.equal(3.75);
         workHours.calculate(new Date(2014, 3, 16)).should.equal(3.75);
     });
-    /**
-     Testing this:
 
-     1) Copy-paste this scope (the file) into developer tools.
-     2) Copy paste the test command:
+    it('Should detect Munday Thursday as a day off', function () {
+        workHours.calculate(new Date(2014, 3, 17)).should.equal(0);
+    });
 
-     //<editor-fold dec="TEST COMMAND">
-     var tests = [
-         ///// Easter
-         ['workHours.calculate(new Date(2016, 2, 23))', 3.75],  // Wednesday March 23 2016 half day
-         ['workHours.calculate(new Date(2014, 3, 16))', 3.75],  // Wednesday April 16 2014 half day
-         ['workHours.calculate(new Date(2014, 3, 17))', 0],     // Thursday April 17 2014 (munday thursday) off
-         ['workHours.calculate(new Date(2014, 3, 18))', 0],     // Friday April 18 2014 (good day) off
-         ['workHours.calculate(new Date(2014, 3, 21))', 0],     // Monday April 21 2014 (second day of easter) off
+    it('Should detect Good Friday as a day off', function () {
+        workHours.calculate(new Date(2014, 3, 18)).should.equal(0);
+    });
 
-         ['workHours.calculate(new Date(2014, 4, 29))', 0],     // Thursday May 29 2014 (ascension day) off
+    it('Should detect second day of Easter as a day off', function () {
+        workHours.calculate(new Date(2014, 3, 21)).should.equal(0);
+    });
 
-         ['workHours.calculate(new Date(2014, 5, 8))', 0],      // Sunday June 8 2014 (ascension day) off
-         ['workHours.calculate(new Date(2014, 5, 9))', 0],      // Monday June 9 2014 (second day of pentecost) off
-         ['workHours.calculate(new Date(2014, 5, 10))', 7.5],   // Tuesday June 10 2014 regular day
-         ['workHours.calculate(new Date(2014, 5, 6))', 7.5]     // Friday June 6 2014 regular day
-     ];
-     var err = false;
-     _.forEach(tests, function (test) {
-        var expr = test[0], expected = test[1];
-        var result = eval(expr);
-        if (result !== expected) {
-            err = true;
-            console.log('ERROR test failed. Expected "' + expected + '", but received "' + result + '". [' + expr + ']');
-        }
-     });
-     if (!err) console.log('All tests passed OK.');
-     //</editor-fold>
-     */
+    it('Should detect ascension day as a day off', function () {
+        workHours.calculate(new Date(2014, 4, 29)).should.equal(0);
+        workHours.calculate(new Date(2000, 5,  1)).should.equal(0);
+        workHours.calculate(new Date(2020, 4, 21)).should.equal(0);
+    });
+
+    it('Should detect Pentecost day as a day off (always a Sunday anyway...)', function () {
+        workHours.calculate(new Date(2014, 5, 8)).should.equal(0);
+    });
+
+    it('Should detect second day of Pentecost as a day off', function () {
+        workHours.calculate(new Date(2014, 5, 9)).should.equal(0);
+        workHours.calculate(new Date(2015, 4, 24)).should.equal(0);
+        workHours.calculate(new Date(2016, 4, 15)).should.equal(0);
+    });
+
+    it('Should detect day after second day of Pentecost as a normal day', function () {
+        workHours.calculate(new Date(2014, 5, 10)).should.equal(7.5);
+    });
+
+    it('Should detect Friday June 6 2014 as a regular day', function () {
+        workHours.calculate(new Date(2014, 5, 6)).should.equal(7.5);
+    });
+
+    it('Should detect Constitution Day as a day off', function () {
+        workHours.calculate(new Date(2014, 4, 17)).should.equal(0);
+        workHours.calculate(new Date(2015, 4, 17)).should.equal(0);
+        workHours.calculate(new Date(2016, 4, 17)).should.equal(0);
+        workHours.calculate(new Date(2017, 4, 17)).should.equal(0);
+    });
+
+    it('Should detect Labour Day as a day off', function () {
+        workHours.calculate(new Date(2014, 4, 1)).should.equal(0);
+        workHours.calculate(new Date(2015, 4, 1)).should.equal(0);
+        workHours.calculate(new Date(2017, 4, 1)).should.equal(0);
+        workHours.calculate(new Date(2016, 4, 1)).should.equal(0);
+    });
 });

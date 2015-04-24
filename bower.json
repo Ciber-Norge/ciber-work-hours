@@ -1,0 +1,20 @@
+{
+  "name": "ciber-work-hours",
+  "main": "dist/ciber-work-hours.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Ciber-Norge/ciber-work-hours",
+  "authors": [
+    "yngsva <yngve.svalestuen@ciber.com>"
+  ],
+  "readme": "README.md",
+  "repository": "https://github.com/Ciber-Norge/ciber-work-hours.git",
+  "description": "Calculate work hours for days and months...",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

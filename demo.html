@@ -12,12 +12,18 @@
             <input type="date" placeholder="Test date" />
         </form>
 
-        <table id="result">
+        <table>
             <thead>
                 <tr>
-                    
+                    <th>
+                        Language code
+                    </th>
+                    <th>
+                        Work hours
+                    </th>
                 </tr>
             </thead>
+            <tbody id="result"></tbody>
         </table>
 
         <script src="dist/ciber-work-hours.js"></script>
@@ -32,8 +38,25 @@
 
             var dateElement = document.querySelector('input[type=date]');
 
-            dateElement.onchange = function (date) {
-                console.log(this.value);
+            dateElement.onchange = function () {
+                var date = this.valueAsDate;
+                var resultElement = document.querySelector('#result');
+
+                while (resultElement.firstChild) {
+                    resultElement.removeChild(resultElement.firstChild);
+                }
+
+                languages.forEach(function (langCode) {
+                    var result = workHours[langCode].calculate(date);
+                    var langEl = document.createElement('td');
+                    langEl.textContent = langCode;
+                    var resultEl = document.createElement('td');
+                    resultEl.textContent = result;
+                    var rowEl = document.createElement('tr');
+                    rowEl.appendChild(langEl);
+                    rowEl.appendChild(resultEl);
+                    resultElement.appendChild(rowEl);
+                });
             };
         </script>
     </body>

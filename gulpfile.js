@@ -56,11 +56,13 @@ gulp.task('rulesets-insert', ['rulesets'], function () {
 gulp.task('browserify', ['rulesets-insert', 'clean-rulesets'], function () {
   return gulp.src('./dist/' + fileName)
     .pipe(through.obj(function (file, enc, next) {
-        browserify(file.path, {expose: moduleName})
-            .bundle(function (err, res) {
-                file.contents = res;
-                next(null, file);
-            });
+        var b = browserify();
+        b.add(file.path);
+        b.require(file.path, {expose: moduleName});
+        b.bundle(function (err, res) {
+            file.contents = res;
+            next(null, file);
+        });
     }))
     .pipe(gulp.dest('./dist/'));
 });

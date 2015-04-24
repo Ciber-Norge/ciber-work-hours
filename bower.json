@@ -12,9 +12,14 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "gulpfile.js",
+    "rules",
+    "index.js",
+    "package.json",
+    "bower.json",
+    "README.md",
     "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ]
 }

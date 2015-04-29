@@ -3,7 +3,6 @@
 var gulp    = require('gulp');
 var del     = require('del');
 var browserify = require('browserify');
-var transform = require('vinyl-transform');
 var plugins = require('gulp-load-plugins')();
 var path = require('path');
 var through = require('through2');
@@ -80,9 +79,9 @@ gulp.task('unitTest', function () {
 });
 
 gulp.task('watch', ['test'], function () {
-  gulp.watch(paths.watch, ['yaml', 'test']);
+  gulp.watch(paths.watch, ['clean-dist', 'rulesets', 'test']);
 });
 
 gulp.task('test', ['lint', 'unitTest']);
 
-gulp.task('default', ['test']);
+gulp.task('default', ['rulesets', 'test']);

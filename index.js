@@ -54,6 +54,10 @@ function addDays(date, numDays) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate() + numDays)
 }
 
+function dateInRange(first, last, date) {
+    return date >= first && last >= date;
+}
+
 var premadeRulesets = {
     /* insert: rulesets */
 };
@@ -85,7 +89,16 @@ module.exports = function (ruleset) {
                 }
                 return sameDay(new Date(date.getFullYear(), rule.month, rule.date), date);
             }
-            if (rule.day !== undefined) return rule.day === date.getDay();
+            if (rule.day !== undefined) {
+                if (rule.day === date.getDay()) {
+                    if (rule.first !== undefined && rule.last !== undefined) {
+                        var firstDate = new Date(date.getFullYear(), rule.first.month, rule.first.date);
+                        var lastDate = new Date(date.getFullYear(), rule.last.month, rule.last.date);
+                        return dateInRange(firstDate, lastDate, date);
+                    }
+                    return rule.day === date.getDay();
+                }
+            }
             if (rule.reference !== undefined) {
                 if (rule.reference === 'EASTER') {
                     return sameDay(addDays(easter, rule.offset || 0), date);

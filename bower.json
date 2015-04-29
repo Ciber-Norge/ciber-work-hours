@@ -1,7 +1,7 @@
 {
   "name": "ciber-work-hours",
   "main": "dist/ciber-work-hours.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "homepage": "https://github.com/Ciber-Norge/ciber-work-hours",
   "authors": [
     "yngsva <yngve.svalestuen@ciber.com>"

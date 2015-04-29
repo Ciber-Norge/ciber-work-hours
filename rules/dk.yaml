@@ -1,24 +1,23 @@
 regularHours: 7.5
 daysOff:
-    # CIBER SPECIAL
-    - {month: 11, date: 24, name: Julaften}
-    - {month: 11, date: 31, name: Nyttårsaften}
-
+    # http://en.wikipedia.org/wiki/Public_holidays_in_Denmark
     # saturdays and sundays
     - {day: 6, name: Lørdag}
     - {day: 0, name: Søndag}
 
-    # common Danish holidays
+    # Public Danish holidays
     - {month: 0, date: 1, name: Første nyttårsdag}
-    - {month: 4, date: 1, name: Arbeidernes dag}
     - {month: 11, date: 25, name: Første juledag}
     - {month: 11, date: 26, name: Andre juledag}
-    - {month: 5, date: 5, name: Grundlovsdag}
     - {reference: EASTER, offset: -7, name: Palmesøndag}
     - {reference: EASTER, offset: -3, name: Skjærtorsdag}
     - {reference: EASTER, offset: -2, name: Langfredag}
     - {reference: EASTER, offset:  0, name: Første påskedag}
     - {reference: EASTER, offset:  1, name: Andre påskedag}
+    - {reference: EASTER, offset: 26, name: Store bededag}
     - {reference: EASTER, offset: 39, name: Kristi himmelfartsdag}
     - {reference: EASTER, offset: 49, name: Første Pinsedag}
     - {reference: EASTER, offset: 50, name: Andre pinsedag}
+
+    # Other special days
+    - {month: 5, date: 5, name: Grundlovsdag}
